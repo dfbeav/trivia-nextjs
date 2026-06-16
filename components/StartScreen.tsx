@@ -1,4 +1,4 @@
-import Button from '@/components/Button';
+import ButtonWhite from '@/components/ButtonWhite';
 import Lightfall from '@/components/Lightfall';
 import Dropdown from '@/components/Dropdown';
 
@@ -34,50 +34,52 @@ export default function StartScreen() {
             />
             </div>
 
-            <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
-                <div className="mb-16 text-center">
-                    <div className="w-[550px] bg-black/30 backdrop-blur-sm text-white text-center rounded-t-full mb-4">
-                        <p className='uppercase tracking-widest py-1 font-bold'>W e l c o m e &nbsp; T o</p>
+            <div className="absolute top-0 left-0 w-full h-full">
+                <div className="flex flex-col items-center justify-center h-full">
+                    <div className="mb-16 text-center">
+                        <div className="w-[550px] bg-black/30 backdrop-blur-sm text-white text-center rounded-t-full mb-4">
+                            <p className='uppercase tracking-widest py-1 font-bold'>W e l c o m e &nbsp; T o</p>
+                        </div>
+                        <h1 className="text-2xl md:text-4xl font-bold mb-2 uppercase tracking-widest text-shadow-lg">
+                            &#10022; Who Wants To Win &#10022;
+                        </h1>
+                        <h1 className="text-4xl md:text-6xl font-bold mb-4 uppercase tracking-wide text-shadow-lg">Braging Rights</h1>
+                        <div className="w-[550px] bg-black/30 backdrop-blur-sm text-white text-center rounded-b-full mb-4">
+                            <p className='uppercase tracking-widest py-1 font-bold'>T R I V I A</p>
+                        </div>
                     </div>
-                    <h1 className="text-2xl md:text-4xl font-bold mb-2 uppercase tracking-widest text-shadow-lg">
-                        &#10022; Who Wants To Win &#10022;
-                    </h1>
-                    <h1 className="text-4xl md:text-6xl font-bold mb-4 uppercase tracking-wide text-shadow-lg">Braging Rights</h1>
-                    <div className="w-[550px] bg-black/30 backdrop-blur-sm text-white text-center rounded-b-full mb-4">
-                        <p className='uppercase tracking-widest py-1 font-bold'>T R I V I A</p>
+                    <p className="text-white mb-8">
+                        Select the trivia options below to create a game and test your knowledge!
+                    </p>
+                    <div className="flex gap-4 mb-8">
+                        <Dropdown
+                            label="Select Category"
+                            width="250px"
+                            selection={category}
+                            options={['General', 'Science', 'History']}
+                            onChange={setCategory}
+                        />
+
+                        <Dropdown
+                            label="Select Difficulty"
+                            width="250px"
+                            selection={difficulty}
+                            options={['Easy', 'Medium', 'Hard']}
+                            onChange={setDifficulty}
+                        />
+
+                        <Dropdown
+                            label="Number of Questions"
+                            width="250px"
+                            selection={numQuestions}
+                            options={['5 Questions', '10 Questions', '15 Questions', '20 Questions']}
+                            onChange={setNumQuestions}
+                        />
                     </div>
+                    <ButtonWhite uppercase>
+                    Start Playing
+                    </ButtonWhite>
                 </div>
-                <p className="text-white mb-8">
-                    Select the trivia options below to create a game and test your knowledge!
-                </p>
-                <div className="flex gap-4 mb-8">
-                    <Dropdown
-                        label="Select Category"
-                        width="250px"
-                        selection={category}
-                        options={['General', 'Science', 'History']}
-                        onChange={setCategory}
-                    />
-
-                    <Dropdown
-                        label="Select Difficulty"
-                        width="250px"
-                        selection={difficulty}
-                        options={['Easy', 'Medium', 'Hard']}
-                        onChange={setDifficulty}
-                    />
-
-                    <Dropdown
-                        label="Number of Questions"
-                        width="250px"
-                        selection={numQuestions}
-                        options={['5 Questions', '10 Questions', '15 Questions', '20 Questions']}
-                        onChange={setNumQuestions}
-                    />
-                </div>
-                <Button uppercase>
-                Start Playing
-                </Button>
             </div>
         </div>
     )
