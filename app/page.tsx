@@ -2,6 +2,7 @@
 "use client";
 import StartScreen from '@/components/StartScreen';
 import ButtonGlass from '@/components/ButtonGlass';
+import Game from '@/components/Game';
 
 import { RiVolumeUpFill, RiVolumeMuteFill } from '@remixicon/react';
 
@@ -11,8 +12,18 @@ type Categories = {
   trivia_categories: { id: number; name: string }[];
 };
 
+type Questions = {
+  category: string;
+  type: string;
+  difficulty: string;
+  question: string;
+  correct_answer: string;
+  incorrect_answers: string[];
+};
+
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const pendingAutoPlay = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
 
@@ -21,22 +32,48 @@ export default function Home() {
   const [numQuestions, setNumQuestions] = useState("10 Questions");
 
   const [categories, setCategories] = useState<Categories>({} as Categories);
+  const [error, setError] = useState<string | null>(null);
+  const [questions, setQuestions] = useState<Questions[]>([]);
+  const [currentSong, setCurrentSong] = useState<string | null>(null);
+
+  // Fade transition state
+  const [visibleScreen, setVisibleScreen] = useState<'start' | 'game'>('start');
+  const [startVisible, setStartVisible] = useState(true);
+  const [gameVisible, setGameVisible] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.src = "/audio/fastest-answer.mp3";
+    setIsAudioReady(false);
+    audio.src = currentSong || "";
     audio.load();
-    const handleCanPlay = () => setIsAudioReady(true);
+    const handleCanPlay = async () => {
+      setIsAudioReady(true);
+      if (pendingAutoPlay.current) {
+        pendingAutoPlay.current = false;
+        try {
+          await audio.play();
+          setIsPlaying(true);
+        } catch (err) {
+          console.error("Auto-play after song switch failed:", err);
+        }
+      }
+    };
     audio.addEventListener("canplaythrough", handleCanPlay);
     return () => audio.removeEventListener("canplaythrough", handleCanPlay);
-  }, []);
+  }, [currentSong]);
 
   useEffect(() => {
+    //set audio source to a random song from the public folder
+    setCurrentSong(`/audio/fastest-answer.mp3`);
+
     fetch("https://opentdb.com/api_category.php")
       .then((res) => res.json())
       .then((data) => setCategories(data))
-      .catch((err) => console.error("Error fetching categories:", err));
+      .catch((err) => {
+        console.error("Error fetching categories:", err);
+        setError("Failed to fetch categories. Please try again later.");
+      });
   }, []);
 
   const toggleMusic = async () => {
@@ -60,25 +97,42 @@ export default function Home() {
     return cat ? cat.id : null;
   };
 
-  const handleStartGame = () => {
+  const FADE_DURATION = 400; // ms
+
+  const handleStartGame = async () => {
     const categoryId = getCategoryId(category);
     const amount = parseInt(numQuestions);
     const diff = difficulty.toLowerCase();
 
     const url = `https://opentdb.com/api.php?amount=${amount}&category=${categoryId}&difficulty=${diff}&type=multiple`;
-    console.log("Fetching questions from:", url);
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Questions:", data);
-        // TODO: pass data to your game screen
-      })
-      .catch((err) => console.error("Error fetching questions:", err));
+    if (isPlaying) {
+      const audio = audioRef.current;
+      audio?.pause();
+      pendingAutoPlay.current = true;
+    }
+    setCurrentSong(`/audio/speculation-under-glass.mp3`);
+
+    // Fade out StartScreen
+    setStartVisible(false);
+
+    const [data] = await Promise.all([
+      fetch(url).then((res) => res.json()),
+      new Promise((resolve) => setTimeout(resolve, FADE_DURATION)),
+    ]);
+
+    console.log("Questions:", data.results);
+    setQuestions(data.results);
+    setVisibleScreen('game');
+
+    // Fade in Game on next tick so the element is mounted first
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setGameVisible(true));
+    });
   };
 
   return (
-    <main className="relative flex flex-col items-center justify-center h-full">
+    <main className="relative flex flex-col items-center justify-center h-full bg-black">
       <audio ref={audioRef} preload="auto" loop />
 
       <div className="absolute z-10 top-0 right-0 w-full flex justify-end p-4">
@@ -91,16 +145,32 @@ export default function Home() {
         </ButtonGlass>
       </div>
 
-      <StartScreen
-        categories={categories.trivia_categories}
-        category={category}
-        difficulty={difficulty}
-        numQuestions={numQuestions}
-        onCategoryChange={setCategory}
-        onDifficultyChange={setDifficulty}
-        onNumQuestionsChange={setNumQuestions}
-        onStart={handleStartGame}
-      />
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div
+        className="w-full h-full flex items-center justify-center transition-opacity duration-400"
+        style={{ opacity: startVisible ? 1 : 0, display: visibleScreen === 'game' ? 'none' : 'flex' }}
+      >
+        <StartScreen
+          categories={categories.trivia_categories}
+          category={category}
+          difficulty={difficulty}
+          numQuestions={numQuestions}
+          onCategoryChange={setCategory}
+          onDifficultyChange={setDifficulty}
+          onNumQuestionsChange={setNumQuestions}
+          onStart={handleStartGame}
+        />
+      </div>
+
+      {visibleScreen === 'game' && questions.length > 0 && (
+        <div
+          className="w-full h-full flex items-center justify-center transition-opacity duration-400"
+          style={{ opacity: gameVisible ? 1 : 0 }}
+        >
+          <Game questions={questions} />
+        </div>
+      )}
     </main>
   );
 }

@@ -55,10 +55,10 @@ export default function StartScreen({
                         <div className="w-[400px] md:w-[732px] bg-black/30 backdrop-blur-sm text-white text-center rounded-t-full mb-4">
                             <p className='uppercase tracking-widest py-1 font-bold'>W e l c o m e &nbsp; T o</p>
                         </div>
-                        <h1 className="text-2xl md:text-5xl font-bold mb-2 uppercase tracking-widest text-shadow-lg">
+                        <h1 className="text-2xl md:text-5xl font-bold mb-2 uppercase tracking-widest text-shadow-lg text-white">
                             &#10022; Who Wants To Win &#10022;
                         </h1>
-                        <h1 className="text-4xl md:text-7xl font-bold mb-4 uppercase text-shadow-lg">Bragging Rights</h1>
+                        <h1 className="text-4xl md:text-7xl font-bold mb-4 uppercase text-shadow-lg text-white">Bragging Rights</h1>
                         <div className="w-[400px] md:w-[732px] bg-black/30 backdrop-blur-sm text-white text-center rounded-b-full mb-4">
                             <p className='uppercase tracking-widest py-1 font-bold'>T R I V I A</p>
                         </div>
@@ -96,7 +96,7 @@ export default function StartScreen({
             </div>
 
             <div className="absolute bottom-0 left-0 w-full flex justify-between items-center text-xs px-4 py-2">
-                <p className="text-white">Created by <a href="www.dbeav.pro" className="underline">David Beaver</a></p>
+                <p className="text-white">Created by <a href="https://www.dbeav.pro" className="underline">David Beaver</a></p>
                 <p className="text-white">Powered by <a href="https://opentdb.com/" className="underline">Open Trivia DB</a></p>
             </div>
         </div>
