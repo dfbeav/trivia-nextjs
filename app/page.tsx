@@ -111,7 +111,6 @@ export default function Home() {
       audio?.pause();
       pendingAutoPlay.current = true;
     }
-    setCurrentSong(`/audio/speculation-under-glass.mp3`);
 
     // Fade out StartScreen
     setStartVisible(false);
@@ -121,7 +120,6 @@ export default function Home() {
       new Promise((resolve) => setTimeout(resolve, FADE_DURATION)),
     ]);
 
-    console.log("Questions:", data.results);
     setQuestions(data.results);
     setVisibleScreen('game');
 
@@ -129,6 +127,8 @@ export default function Home() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setGameVisible(true));
     });
+
+    setCurrentSong(`/audio/speculation-under-glass.mp3`);
   };
 
   return (
