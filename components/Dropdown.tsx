@@ -80,7 +80,7 @@ export default function Dropdown({
               onChange(option);
               setOpen(false);
             }}
-            className="block w-full text-left px-4 py-1 hover:bg-white/20 rounded cursor-pointer"
+            className="block w-full text-left px-4 py-1 hover:bg-white/20 rounded cursor-pointer text-white"
           >
             {option}
           </button>

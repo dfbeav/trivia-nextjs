@@ -89,7 +89,7 @@ export default function StartScreen({
                             onChange={onNumQuestionsChange}
                         />
                     </div>
-                    <ButtonWhite uppercase onClick={onStart}>
+                    <ButtonWhite uppercase bold onClick={onStart}>
                         Start Playing
                     </ButtonWhite>
                 </div>
