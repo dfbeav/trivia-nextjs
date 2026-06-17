@@ -81,6 +81,11 @@ export default function StartScreen() {
                     </ButtonWhite>
                 </div>
             </div>
+
+            <div className="absolute bottom-0 left-0 w-full flex justify-between items-center text-xs px-4 py-2">
+                <p className="text-white">Created by <a href="www.dbeav.pro" className="underline">David Beaver</a></p>
+                <p className="text-white">Powered by <a href="https://opentdb.com/" className="underline">Open Trivia DB</a></p>
+            </div>
         </div>
     )
 }
