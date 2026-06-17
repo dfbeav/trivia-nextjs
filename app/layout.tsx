@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TriviaTime",
+  title: "Who Wants To Win Bragging Rights?",
   description: "A fun trivia game to test your knowledge",
 };
 

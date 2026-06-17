@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface DropdownProps {
   label?: string;
@@ -16,6 +16,21 @@ export default function Dropdown({
   onChange,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
     <div className="relative flex flex-col">
@@ -53,7 +68,7 @@ export default function Dropdown({
           transformOrigin: "top center",
           pointerEvents: open ? "auto" : "none",
         }}
-        className={`absolute w-full top-full mt-2 bg-black/40 border border-gray-900 backdrop-blur-lg rounded-lg p-4 ${
+        className={`absolute w-full max-h-[300px] overflow-y-auto top-full mt-2 bg-black/40 border border-gray-900 backdrop-blur-lg rounded-lg p-4 ${
           open ? "dropdown-open" : "dropdown-close"
         }`}
       >
