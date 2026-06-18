@@ -18,9 +18,6 @@ export default function WinScreen({handleGoHome}: {handleGoHome: () => void}) {
                     rayCount={0}
                     mixBlendMode="lighten"
                     colors={['#ff007a', '#4d3dff', '#ffffff']}
-                    color0="#55a3f7"
-                    color1="#3a43ed"
-                    color2="#6366F1"
                 />
             </div>
 

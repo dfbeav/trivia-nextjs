@@ -44,9 +44,6 @@ export default function StartScreen({
                     mouseInteraction
                     mouseStrength={0.5}
                     mouseRadius={1}
-                    color1="#A6C8FF"
-                    color2="#5227FF"
-                    color3="#d8b74d"
                 />
             </div>
 
@@ -79,7 +76,7 @@ export default function StartScreen({
                             label="Number of Questions"
                             width="250px"
                             selection={numQuestions}
-                            options={['6 Questions', '12 Questions', '15 Questions', '18 Questions']}
+                            options={['6 Questions', '9 Questions', '12 Questions', '15 Questions', '18 Questions']}
                             onChange={onNumQuestionsChange}
                         />
                     </div>
