@@ -1,7 +1,10 @@
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { RiArrowGoBackLine } from '@remixicon/react';
+
 import DarkVeil from './DarkVeil';
 import CountdownTimer, { CountdownTimerHandle } from "./CountdownTimer";
+import ButtonGlass from './ButtonGlass';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
 
 type Questions = {
     category: string;
@@ -12,7 +15,7 @@ type Questions = {
     incorrect_answers: string[];
 };
 
-export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: { questions: Questions[]; quantity: number; rightAnswer: () => void; wrongAnswer: (type: 'timer' | 'answered') => void }) {
+export default function Game({ questions, quantity, rightAnswer, wrongAnswer, handleGoHome }: { questions: Questions[]; quantity: number; rightAnswer: () => void; wrongAnswer: (type: 'timer' | 'answered') => void; handleGoHome: () => void }) {
 
     const [shuffledAnswers, setShuffledAnswers] = useState<string[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -110,8 +113,8 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: 
                 warpAmount={0}
                 />
             </div>
-            <div className="absolute top-0 left-0 w-full h-full grid grid-cols-4 grid-rows-1 gap-4 p-8">
-                <aside className={`bg-black/50 backdrop-blur-sm text-white text-center rounded-lg p-2 w-full max-w-md grid grid-cols-1 grid-rows-${quantity} place-items-center justify-center`}>
+            <div className="absolute top-0 left-0 w-full h-full grid grid-cols-4 grid-rows-1 gap-4 px-8 py-4">
+                <aside className={`bg-black/50 backdrop-blur-sm text-white text-center rounded-lg p-2 w-full max-w-md hidden lg:grid grid-cols-1 grid-rows-${quantity} place-items-center justify-center`}>
                     <div id="mainLogo" className="animate-slide-in text-center flex flex-col items-center justify-center">
                         <div className="w-[200px] h-[5px] bg-blue-500 text-white text-center rounded-t-full mb-1">
                         </div>
@@ -129,16 +132,28 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: 
                         </div>
                     )) }
                 </aside>
-                <div className="col-span-3 flex flex-col justify-start text-center gap-8">
+                <div className="col-span-4 lg:col-span-3 flex flex-col justify-start text-center gap-8">
 
-                    <div className="flex my-12"></div>
+                    <div className="flex mb-0 md:mb-16">
+                        <ButtonGlass size="small" onClick={handleGoHome}>
+                            <div className="flex items-center gap-2">
+                                <RiArrowGoBackLine size={20} /> New Game
+                            </div>
+                        </ButtonGlass>
+                    </div>
 
-                    <CountdownTimer ref={timerRef} duration={30} onComplete={() => { timerRanOut(); }} />
+                    <div className="w-full flex items-center justify-center">
+                        <div className="w-64 bg-amber-500 text-black text-center rounded-full mb-4">
+                            <p className='uppercase tracking-widest py-1 font-bold'>Question {currentQuestionIndex + 1} of {quantity}</p>
+                        </div>
+                    </div>
 
-                    <div className="flex justify-center items-center max-w-4xl w-full mt-24 mx-auto px-4 rounded-xl h-24 bg-black text-white border-2 border-blue-500">
+                    <CountdownTimer ref={timerRef} duration={3000} onComplete={() => { timerRanOut(); }} />
+
+                    <div className="flex justify-center items-center max-w-4xl w-full h-36 mt-12 md:mt-24 md:h-24 mx-auto px-4 rounded-xl bg-black text-white border-2 border-blue-500">
                         <h2 className="text-lg font-bold text-white">{decodeHtml(questions[currentQuestionIndex].question)}</h2>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 max-w-4xl w-full mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full mx-auto">
                         { shuffledAnswers.map((answer, index) => (
                             <button 
                                 key={index} 

@@ -2,6 +2,7 @@
 "use client";
 import StartScreen from '@/components/StartScreen';
 import ButtonGlass from '@/components/ButtonGlass';
+import ButtonWhite from '@/components/ButtonWhite';
 import Game from '@/components/Game';
 
 import { RiVolumeUpFill, RiVolumeMuteFill } from '@remixicon/react';
@@ -45,6 +46,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Questions[]>([]);
   const [currentSong, setCurrentSong] = useState<string | null>(null);
+  const [showGoHomeConfirm, setShowGoHomeConfirm] = useState(false);
 
   // Fade transition state
   const [visibleScreen, setVisibleScreen] = useState<'start' | 'game'>('start');
@@ -212,7 +214,32 @@ export default function Home() {
         setCurrentSong(`/audio/fastest-answer.mp3`);
 
       }, FADE_DURATION);
-    }, 10000);
+    }, 7000);
+  }
+
+  const handleGoHome = () => {
+
+    setShowGoHomeConfirm(false);
+
+    if (audioEnabled) {
+      pendingAutoPlay.current = true;
+    }
+    
+    setCurrentSong(`/audio/fastest-answer.mp3`);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setGameVisible(false));
+    });
+
+    setTimeout(() => {
+      setVisibleScreen('start');
+      setStartVisible(true);
+
+    }, FADE_DURATION);
+  }
+
+  const confirmGoHome = () => {
+    setShowGoHomeConfirm(true);
   }
 
   return (
@@ -228,7 +255,22 @@ export default function Home() {
       <audio ref={audienceWin} preload="auto" src="/audio/audience-win.mp3" />
       <audio ref={audienceDisappointment} preload="auto" src="/audio/audience-disappointment.mp3" />
 
-      <div className="absolute z-10 top-0 right-0 w-full flex justify-end p-4">
+      <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-20 flex items-center justify-center transition-opacity duration-300 ${showGoHomeConfirm ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className="bg-black rounded-lg p-8 text-center border-2 border-blue-600">
+          <h2 className="text-xl font-bold mb-2 text-amber-500">Are you sure you want to start over?</h2>
+          <p className="mb-6 text-white text-sm">Your current progress will be lost.</p>
+          <div className="flex justify-center gap-4">
+            <ButtonWhite onClick={handleGoHome}>
+              Confirm
+            </ButtonWhite>
+            <ButtonGlass onClick={() => setShowGoHomeConfirm(false)} size="medium">
+              Cancel
+            </ButtonGlass>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute z-10 top-0 right-0 flex justify-end p-4">
         <ButtonGlass size="small" onClick={toggleMusic} disabled={!isAudioReady}>
           <div className="flex items-center gap-2">
             {audioEnabled ?
@@ -261,7 +303,7 @@ export default function Home() {
           className="w-full h-full flex items-center justify-center transition-opacity duration-400"
           style={{ opacity: gameVisible ? 1 : 0 }}
         >
-          <Game questions={questions} quantity={numberOfQuestions} rightAnswer={handleRightAnswer} wrongAnswer={handleWrongAnswer} />
+          <Game questions={questions} quantity={numberOfQuestions} rightAnswer={handleRightAnswer} wrongAnswer={handleWrongAnswer} handleGoHome={confirmGoHome} />
         </div>
       )}
     </main>
