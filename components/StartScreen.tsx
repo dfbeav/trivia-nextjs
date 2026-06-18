@@ -79,7 +79,7 @@ export default function StartScreen({
                             label="Number of Questions"
                             width="250px"
                             selection={numQuestions}
-                            options={['3 Questions', '12 Questions', '15 Questions', '18 Questions']}
+                            options={['6 Questions', '12 Questions', '15 Questions', '18 Questions']}
                             onChange={onNumQuestionsChange}
                         />
                     </div>

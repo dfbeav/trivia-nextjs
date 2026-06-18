@@ -40,7 +40,7 @@ export default function Home() {
 
   const [category, setCategory] = useState("General Knowledge");
   const [difficulty, setDifficulty] = useState("Medium");
-  const [numQuestions, setNumQuestions] = useState("3 Questions");
+  const [numQuestions, setNumQuestions] = useState("9 Questions");
 
   const [categories, setCategories] = useState<Categories>({} as Categories);
   const [error, setError] = useState<string | null>(null);
@@ -273,7 +273,7 @@ export default function Home() {
   }
 
   return (
-    <main className="relative flex flex-col items-center justify-center h-full bg-black">
+    <main className="relative flex flex-col items-center justify-center h-screen bg-black">
       <audio ref={audioRef} preload="auto" loop />
       <audio ref={wrongAnswer} preload="auto" src="/audio/wrong-answer.mp3" />
       <audio ref={timerDone} preload="auto" src="/audio/timer-done.mp3" />
@@ -314,7 +314,7 @@ export default function Home() {
 
       {visibleScreen === 'start' && (
         <div
-          className="w-full h-full flex items-center justify-center transition-opacity duration-400"
+          className="w-full h-screen flex items-center justify-center transition-opacity duration-400"
           style={{ opacity: startVisible ? 1 : 0, display: visibleScreen !== 'start' ? 'none' : 'flex' }}
         >
           <StartScreen
@@ -332,16 +332,16 @@ export default function Home() {
 
       {visibleScreen === 'game' && questions.length > 0 && (
         <div
-          className="w-full h-full flex items-center justify-center transition-opacity duration-400"
+          className="w-full h-screen flex items-center justify-center transition-opacity duration-400"
           style={{ opacity: gameVisible ? 1 : 0, display: visibleScreen !== 'game' ? 'none' : 'flex' }}
         >
-          <Game questions={questions} quantity={numberOfQuestions} rightAnswer={handleRightAnswer} wrongAnswer={handleWrongAnswer} handleGoHome={confirmGoHome} gameWon={winGame} />
+          <Game questions={questions} quantity={numberOfQuestions} audioEnabled={audioEnabled} rightAnswer={handleRightAnswer} wrongAnswer={handleWrongAnswer} handleGoHome={confirmGoHome} gameWon={winGame} />
         </div>
       )}
 
       {visibleScreen === 'win' && (
         <div
-          className="w-full h-full flex items-center justify-center transition-opacity duration-400"
+          className="w-full h-screen flex items-center justify-center transition-opacity duration-400"
           style={{ opacity: winVisible ? 1 : 0, display: visibleScreen !== 'win' ? 'none' : 'flex' }}
         >
           <WinScreen handleGoHome={handleGoHome} />

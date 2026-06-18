@@ -68,7 +68,7 @@ export default function Dropdown({
           transformOrigin: "top center",
           pointerEvents: open ? "auto" : "none",
         }}
-        className={`absolute w-full max-h-[300px] overflow-y-auto top-full mt-2 bg-black/40 border border-gray-900 backdrop-blur-lg rounded-lg p-4 ${
+        className={`absolute w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent top-full mt-2 bg-black/40 border border-gray-900 backdrop-blur-lg rounded-lg p-4 ${
           open ? "dropdown-open" : "dropdown-close"
         }`}
       >

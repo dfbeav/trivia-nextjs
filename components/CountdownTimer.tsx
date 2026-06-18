@@ -10,12 +10,14 @@ export interface CountdownTimerHandle {
 interface CountdownTimerProps {
   /** Total duration in seconds */
   duration: number;
+  /** Whether the ticking sound should play in the last 5 seconds */
+  audioEnabled?: boolean;
   /** Called when the timer reaches zero */
   onComplete?: () => void;
 }
 
 const CountdownTimer = forwardRef<CountdownTimerHandle, CountdownTimerProps>(
-  ({ duration, onComplete }, ref) => {
+  ({ duration, audioEnabled, onComplete }, ref) => {
 
     const tiktok = useRef<HTMLAudioElement>(null);
 
@@ -73,7 +75,7 @@ const CountdownTimer = forwardRef<CountdownTimerHandle, CountdownTimerProps>(
             return 0;
           }
 
-          if (prev === 6) {
+          if (prev === 6 && audioEnabled) {
             tiktok.current?.play();
           }
 

@@ -17,7 +17,7 @@ type Questions = {
     incorrect_answers: string[];
 };
 
-export default function Game({ questions, quantity, rightAnswer, wrongAnswer, handleGoHome, gameWon }: { questions: Questions[]; quantity: number; rightAnswer: () => void; wrongAnswer: (type: 'timer' | 'answered') => void; handleGoHome: () => void; gameWon: () => void }) {
+export default function Game({ questions, quantity, audioEnabled, rightAnswer, wrongAnswer, handleGoHome, gameWon }: { questions: Questions[]; quantity: number; audioEnabled?: boolean; rightAnswer: () => void; wrongAnswer: (type: 'timer' | 'answered') => void; handleGoHome: () => void; gameWon: () => void }) {
 
     const [shuffledAnswers, setShuffledAnswers] = useState<string[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -97,8 +97,8 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer, ha
     }, [currentQuestionIndex, questions, wrongAnswer]);
 
     return (
-        <div className="relative w-full h-full">
-            <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
+        <div className="relative w-full h-screen">
+            <div style={{ width: '100%', height: '100vh', position: 'relative', overflow: 'hidden' }}>
                 <DarkVeil
                 hueShift={10}
                 noiseIntensity={0}
@@ -108,7 +108,7 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer, ha
                 warpAmount={0}
                 />
             </div>
-            <div className="absolute top-0 left-0 w-full h-full grid grid-cols-4 grid-rows-1 gap-4 px-8 py-4">
+            <div className="absolute top-0 left-0 w-full h-screen grid grid-cols-4 grid-rows-1 gap-4 px-8 py-4">
                 <aside className={`bg-black/50 backdrop-blur-sm text-white text-center rounded-lg p-2 w-full max-w-md hidden lg:grid grid-cols-1 grid-rows-${quantity} place-items-center justify-center`}>
                     <div id="mainLogo" className="animate-slide-in text-center flex flex-col items-center justify-center">
                         <div className="w-[200px] h-[5px] bg-blue-500 text-white text-center rounded-t-full mb-1">
@@ -138,14 +138,16 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer, ha
                     </div>
 
                     <div className="w-full flex items-center justify-center">
-                        <div className="w-64 bg-amber-500 text-black text-center rounded-full mb-4">
+                        <div className="w-64 bg-amber-500 text-black text-center rounded-full mb-0 sm:mb-4">
                             <p className='uppercase tracking-widest py-1 font-bold'>Question {currentQuestionIndex + 1} of {quantity}</p>
                         </div>
                     </div>
 
-                    <CountdownTimer ref={timerRef} duration={30} onComplete={() => { timerRanOut(); }} />
+                    <div className="transform scale-75 md:scale-100 -mb-6 -mt-6 sm:mb-0 sm:mt-0">
+                        <CountdownTimer ref={timerRef} duration={30} onComplete={() => { timerRanOut(); }} audioEnabled={audioEnabled} />
+                    </div>
 
-                    <div className="flex justify-center items-center max-w-4xl w-full h-36 mt-12 md:mt-24 md:h-24 mx-auto px-4 rounded-xl bg-black text-white border-2 border-blue-500">
+                    <div className="flex justify-center items-center max-w-4xl w-full h-36 mt-0 md:mt-24 md:h-24 mx-auto px-4 rounded-xl bg-black text-white border-2 border-blue-500">
                         <h2 className="text-lg font-bold text-white">{he.decode(questions[currentQuestionIndex].question)}</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full mx-auto">
