@@ -74,18 +74,18 @@ export default function StartScreen({
                             options={categories?.map((cat) => cat.name) || []}
                             onChange={onCategoryChange}
                         />
-                        <Dropdown
+                        {/* <Dropdown
                             label="Select Difficulty"
                             width="250px"
                             selection={difficulty}
                             options={['Easy', 'Medium', 'Hard']}
                             onChange={onDifficultyChange}
-                        />
+                        /> */}
                         <Dropdown
                             label="Number of Questions"
                             width="250px"
                             selection={numQuestions}
-                            options={['5 Questions', '10 Questions', '15 Questions', '20 Questions']}
+                            options={['9 Questions', '12 Questions', '15 Questions', '18 Questions']}
                             onChange={onNumQuestionsChange}
                         />
                     </div>

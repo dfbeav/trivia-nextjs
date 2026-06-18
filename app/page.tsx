@@ -23,13 +23,16 @@ type Questions = {
 
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const wrongAnswer = useRef<HTMLAudioElement>(null);
+  const rightAnswer = useRef<HTMLAudioElement>(null);
+
   const pendingAutoPlay = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
 
   const [category, setCategory] = useState("General Knowledge");
   const [difficulty, setDifficulty] = useState("Medium");
-  const [numQuestions, setNumQuestions] = useState("10 Questions");
+  const [numQuestions, setNumQuestions] = useState("9 Questions");
 
   const [categories, setCategories] = useState<Categories>({} as Categories);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +100,8 @@ export default function Home() {
     return cat ? cat.id : null;
   };
 
+  const numberOfQuestions = parseInt(numQuestions);
+
   const FADE_DURATION = 400; // ms
 
   const handleStartGame = async () => {
@@ -104,7 +109,7 @@ export default function Home() {
     const amount = parseInt(numQuestions);
     const diff = difficulty.toLowerCase();
 
-    const url = `https://opentdb.com/api.php?amount=${amount}&category=${categoryId}&difficulty=${diff}&type=multiple`;
+    const url = new URL("https://opentdb.com/api.php");
 
     if (isPlaying) {
       const audio = audioRef.current;
@@ -112,11 +117,20 @@ export default function Home() {
       pendingAutoPlay.current = true;
     }
 
+    const fetchQuestions = async (difficulty: string) => {
+      let quantity = amount / 3;
+
+      const response = await fetch(`${url}?amount=${Math.ceil(quantity)}&category=${categoryId}&difficulty=${difficulty}&ammount=${quantity}&type=multiple`).then((res) => res.json())
+
+      setQuestions((prevQuestions) => [...prevQuestions, ...response.results]);
+      return response;
+    };
+
     // Fade out StartScreen
     setStartVisible(false);
 
     const [data] = await Promise.all([
-      fetch(url).then((res) => res.json()),
+      fetchQuestions('easy'),
       new Promise((resolve) => setTimeout(resolve, FADE_DURATION)),
     ]);
 
@@ -129,11 +143,70 @@ export default function Home() {
     });
 
     setCurrentSong(`/audio/speculation-under-glass.mp3`);
+
+    setTimeout(() => {
+      fetchQuestions('medium')
+    }, 10000);
+
+    setTimeout(() => {
+      fetchQuestions('hard')
+    }, 20000);
   };
+
+  const handleRightAnswer = () => {
+    // pause audio and play wrong answer sound
+    const audio = audioRef.current;
+    const rightAudio = rightAnswer.current;
+    if (audio && rightAudio && isPlaying) {
+      audio.pause();
+      rightAudio.currentTime = 0;
+      setTimeout(() => {
+        rightAudio.play();
+      }, 300);
+
+      setTimeout(() => {
+          audio.play();
+        }, 4000);
+    }
+  }
+
+  const handleWrongAnswer = () => {
+    // pause audio and play wrong answer sound
+    const audio = audioRef.current;
+    const wrongAudio = wrongAnswer.current;
+    if (audio && wrongAudio && isPlaying) {
+      audio.pause();
+      wrongAudio.currentTime = 0;
+      setTimeout(() => {
+        wrongAudio.play();
+      }, 300);
+    }
+
+    setTimeout(() => {
+      wrongAudio?.pause();
+      wrongAudio!.currentTime = 0;
+    
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setGameVisible(false));
+      });
+
+      setTimeout(() => {
+        setVisibleScreen('start');
+        setStartVisible(true);
+      }, FADE_DURATION);
+    }, 4000);
+
+    setCurrentSong(`/audio/fastest-answer.mp3`);
+
+    audio?.play();
+
+  }
 
   return (
     <main className="relative flex flex-col items-center justify-center h-full bg-black">
       <audio ref={audioRef} preload="auto" loop />
+      <audio ref={wrongAnswer} preload="auto" src="/audio/wrong-answer.mp3" />
+      <audio ref={rightAnswer} preload="auto" src="/audio/correct-answer.mp3" />
 
       <div className="absolute z-10 top-0 right-0 w-full flex justify-end p-4">
         <ButtonGlass size="small" onClick={toggleMusic} disabled={!isAudioReady}>
@@ -168,7 +241,7 @@ export default function Home() {
           className="w-full h-full flex items-center justify-center transition-opacity duration-400"
           style={{ opacity: gameVisible ? 1 : 0 }}
         >
-          <Game questions={questions} />
+          <Game questions={questions} quantity={numberOfQuestions} rightAnswer={handleRightAnswer} wrongAnswer={handleWrongAnswer} />
         </div>
       )}
     </main>
