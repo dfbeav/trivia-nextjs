@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { RiArrowGoBackLine } from '@remixicon/react';
+import he from 'he';
 
 import DarkVeil from './DarkVeil';
 import CountdownTimer, { CountdownTimerHandle } from "./CountdownTimer";
 import ButtonGlass from './ButtonGlass';
+
 
 
 type Questions = {
@@ -15,7 +17,7 @@ type Questions = {
     incorrect_answers: string[];
 };
 
-export default function Game({ questions, quantity, rightAnswer, wrongAnswer, handleGoHome }: { questions: Questions[]; quantity: number; rightAnswer: () => void; wrongAnswer: (type: 'timer' | 'answered') => void; handleGoHome: () => void }) {
+export default function Game({ questions, quantity, rightAnswer, wrongAnswer, handleGoHome, gameWon }: { questions: Questions[]; quantity: number; rightAnswer: () => void; wrongAnswer: (type: 'timer' | 'answered') => void; handleGoHome: () => void; gameWon: () => void }) {
 
     const [shuffledAnswers, setShuffledAnswers] = useState<string[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -24,12 +26,6 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer, ha
     const [colorState, setColorState] = useState<string>('');
 
     const timerRef = useRef<CountdownTimerHandle>(null);
-
-    function decodeHtml(html: string) {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = html;
-        return txt.value;
-    }
 
     useEffect(() => {
         if (timerRef.current) {
@@ -80,8 +76,7 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer, ha
             if (currentQuestionIndex < quantity - 1) {
                 handleAnswerIsCorrect()
             } else {
-                alert("Congratulations! You've won!");
-                // Optionally reset the game here
+                gameWon();
             }   
         } else {
             handleAnswerIsWrong();
@@ -148,10 +143,10 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer, ha
                         </div>
                     </div>
 
-                    <CountdownTimer ref={timerRef} duration={3000} onComplete={() => { timerRanOut(); }} />
+                    <CountdownTimer ref={timerRef} duration={30} onComplete={() => { timerRanOut(); }} />
 
                     <div className="flex justify-center items-center max-w-4xl w-full h-36 mt-12 md:mt-24 md:h-24 mx-auto px-4 rounded-xl bg-black text-white border-2 border-blue-500">
-                        <h2 className="text-lg font-bold text-white">{decodeHtml(questions[currentQuestionIndex].question)}</h2>
+                        <h2 className="text-lg font-bold text-white">{he.decode(questions[currentQuestionIndex].question)}</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full mx-auto">
                         { shuffledAnswers.map((answer, index) => (
@@ -167,7 +162,7 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer, ha
                                     ${answer === selectedAnswer ? colorState : 'bg-black'}
                                     ${revealedAnswer === answer ? 'bg-green-600' : ''}
                                     `}>
-                                {decodeHtml(answer)}
+                                {he.decode(answer)}
                             </button>
                         )) }
                     </div>

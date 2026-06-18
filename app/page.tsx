@@ -1,9 +1,9 @@
-// page.tsx
 "use client";
 import StartScreen from '@/components/StartScreen';
 import ButtonGlass from '@/components/ButtonGlass';
 import ButtonWhite from '@/components/ButtonWhite';
 import Game from '@/components/Game';
+import WinScreen from '@/components/WinScreen';
 
 import { RiVolumeUpFill, RiVolumeMuteFill } from '@remixicon/react';
 
@@ -40,7 +40,7 @@ export default function Home() {
 
   const [category, setCategory] = useState("General Knowledge");
   const [difficulty, setDifficulty] = useState("Medium");
-  const [numQuestions, setNumQuestions] = useState("9 Questions");
+  const [numQuestions, setNumQuestions] = useState("3 Questions");
 
   const [categories, setCategories] = useState<Categories>({} as Categories);
   const [error, setError] = useState<string | null>(null);
@@ -49,9 +49,10 @@ export default function Home() {
   const [showGoHomeConfirm, setShowGoHomeConfirm] = useState(false);
 
   // Fade transition state
-  const [visibleScreen, setVisibleScreen] = useState<'start' | 'game'>('start');
+  const [visibleScreen, setVisibleScreen] = useState<'start' | 'game' | 'win'>('start');
   const [startVisible, setStartVisible] = useState(true);
   const [gameVisible, setGameVisible] = useState(false);
+  const [winVisible, setWinVisible] = useState(false);
 
   const audio = audioRef.current;
   const numberOfQuestions = parseInt(numQuestions);
@@ -80,6 +81,7 @@ export default function Home() {
   }, [currentSong]);
 
   useEffect(() => {
+
     //set audio source to a random song from the public folder
     setCurrentSong(`/audio/fastest-answer.mp3`);
 
@@ -217,6 +219,34 @@ export default function Home() {
     }, 7000);
   }
 
+  const winGame = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setGameVisible(false));
+    });
+
+    setTimeout(() => {
+      setVisibleScreen('win');
+      setWinVisible(true);
+
+      if (audioEnabled) {
+        pendingAutoPlay.current = true;
+      }
+
+      setCurrentSong(`/audio/winner.mp3`);
+
+    }, FADE_DURATION);
+      
+    const audienceWinAudio = audienceWin.current;
+    if (audio && audienceWinAudio && audioEnabled) {
+      audio.pause();
+      audienceWinAudio.currentTime = 0;
+      setTimeout(() => {
+        audienceWinAudio.play();
+      }, 300);
+    }
+
+  }
+
   const handleGoHome = () => {
 
     setShowGoHomeConfirm(false);
@@ -282,28 +312,39 @@ export default function Home() {
 
       {error && <p className="text-red-500">{error}</p>}
 
-      <div
-        className="w-full h-full flex items-center justify-center transition-opacity duration-400"
-        style={{ opacity: startVisible ? 1 : 0, display: visibleScreen === 'game' ? 'none' : 'flex' }}
-      >
-        <StartScreen
-          categories={categories.trivia_categories}
-          category={category}
-          difficulty={difficulty}
-          numQuestions={numQuestions}
-          onCategoryChange={setCategory}
-          onDifficultyChange={setDifficulty}
-          onNumQuestionsChange={setNumQuestions}
-          onStart={handleStartGame}
-        />
-      </div>
+      {visibleScreen === 'start' && (
+        <div
+          className="w-full h-full flex items-center justify-center transition-opacity duration-400"
+          style={{ opacity: startVisible ? 1 : 0, display: visibleScreen !== 'start' ? 'none' : 'flex' }}
+        >
+          <StartScreen
+            categories={categories.trivia_categories}
+            category={category}
+            difficulty={difficulty}
+            numQuestions={numQuestions}
+            onCategoryChange={setCategory}
+            onDifficultyChange={setDifficulty}
+            onNumQuestionsChange={setNumQuestions}
+            onStart={handleStartGame}
+          />
+        </div>
+      )}
 
       {visibleScreen === 'game' && questions.length > 0 && (
         <div
           className="w-full h-full flex items-center justify-center transition-opacity duration-400"
-          style={{ opacity: gameVisible ? 1 : 0 }}
+          style={{ opacity: gameVisible ? 1 : 0, display: visibleScreen !== 'game' ? 'none' : 'flex' }}
         >
-          <Game questions={questions} quantity={numberOfQuestions} rightAnswer={handleRightAnswer} wrongAnswer={handleWrongAnswer} handleGoHome={confirmGoHome} />
+          <Game questions={questions} quantity={numberOfQuestions} rightAnswer={handleRightAnswer} wrongAnswer={handleWrongAnswer} handleGoHome={confirmGoHome} gameWon={winGame} />
+        </div>
+      )}
+
+      {visibleScreen === 'win' && (
+        <div
+          className="w-full h-full flex items-center justify-center transition-opacity duration-400"
+          style={{ opacity: winVisible ? 1 : 0, display: visibleScreen !== 'win' ? 'none' : 'flex' }}
+        >
+          <WinScreen handleGoHome={handleGoHome} />
         </div>
       )}
     </main>

@@ -1,4 +1,5 @@
 // StartScreen.tsx
+import WhoWantsToWinBraggingRights from '@/components/WhoWantsToWinBraggingRights';
 import ButtonWhite from '@/components/ButtonWhite';
 import Lightfall from '@/components/Lightfall';
 import Dropdown from '@/components/Dropdown';
@@ -25,7 +26,7 @@ export default function StartScreen({
     onStart,
 }: StartScreenProps) {
     return (
-        <div className="bg-[#172070] w-full h-full flex items-center justify-center relative">
+        <div className="relative bg-[#172070] w-full h-full flex items-center justify-center">
             <div style={{ width: '100%', height: '100vh', position: 'relative', opacity: 0.25 }}>
                 <Lightfall
                     colors={['#A6C8FF', '#5227FF', '#FF9FFC']}
@@ -51,18 +52,11 @@ export default function StartScreen({
 
             <div className="absolute top-0 left-0 w-full h-full">
                 <div className="flex flex-col items-center justify-center h-full">
-                    <div id="mainLogo" className="animate-slide-in mb-16 text-center">
-                        <div className="w-[400px] md:w-[732px] bg-black/30 backdrop-blur-sm text-white text-center rounded-t-full mb-4">
-                            <p className='uppercase tracking-widest py-1 font-bold'>W e l c o m e &nbsp; T o</p>
-                        </div>
-                        <h1 className="text-2xl md:text-5xl font-bold mb-2 uppercase tracking-widest text-shadow-lg text-white">
-                            &#10022; Who Wants To Win &#10022;
-                        </h1>
-                        <h1 className="text-4xl md:text-7xl font-bold mb-4 uppercase text-shadow-lg text-white">Bragging Rights</h1>
-                        <div className="w-[400px] md:w-[732px] bg-black/30 backdrop-blur-sm text-white text-center rounded-b-full mb-4">
-                            <p className='uppercase tracking-widest py-1 font-bold'>T R I V I A</p>
-                        </div>
+                    
+                    <div className="mb-16">
+                        <WhoWantsToWinBraggingRights stage="start" />
                     </div>
+
                     <p className="text-white text-center mb-8 px-12">
                         Select the trivia options below to create a game and test your knowledge!
                     </p>
@@ -85,7 +79,7 @@ export default function StartScreen({
                             label="Number of Questions"
                             width="250px"
                             selection={numQuestions}
-                            options={['9 Questions', '12 Questions', '15 Questions', '18 Questions']}
+                            options={['3 Questions', '12 Questions', '15 Questions', '18 Questions']}
                             onChange={onNumQuestionsChange}
                         />
                     </div>
