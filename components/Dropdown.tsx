@@ -33,7 +33,7 @@ export default function Dropdown({
   }, [dropdownRef]);
 
   return (
-    <div className="relative flex flex-col">
+    <div ref={dropdownRef} className="sm:relative flex flex-col">
       <style>{`
         @keyframes dropdown-in {
           from { opacity: 0; transform: scaleY(0.85) translateY(-6px); }
@@ -68,7 +68,7 @@ export default function Dropdown({
           transformOrigin: "top center",
           pointerEvents: open ? "auto" : "none",
         }}
-        className={`absolute w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent top-full mt-2 bg-black/40 border border-gray-900 backdrop-blur-lg rounded-lg p-4 ${
+        className={`absolute z-10 w-full max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent bottom-4 sm:top-full w-full sm:w-unset mt-2 bg-black/40 border border-gray-900 backdrop-blur-lg rounded-lg p-4 ${
           open ? "dropdown-open" : "dropdown-close"
         }`}
       >
