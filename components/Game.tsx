@@ -1,6 +1,7 @@
 import DarkVeil from './DarkVeil';
+import CountdownTimer, { CountdownTimerHandle } from "./CountdownTimer";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 type Questions = {
     category: string;
@@ -11,7 +12,7 @@ type Questions = {
     incorrect_answers: string[];
 };
 
-export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: { questions: Questions[]; quantity: number; rightAnswer: () => void; wrongAnswer: () => void }) {
+export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: { questions: Questions[]; quantity: number; rightAnswer: () => void; wrongAnswer: (type: 'timer' | 'answered') => void }) {
 
     const [shuffledAnswers, setShuffledAnswers] = useState<string[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -19,11 +20,20 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: 
     const [revealedAnswer, setRevealedAnswer] = useState<string | null>(null);
     const [colorState, setColorState] = useState<string>('');
 
+    const timerRef = useRef<CountdownTimerHandle>(null);
+
     function decodeHtml(html: string) {
         const txt = document.createElement("textarea");
         txt.innerHTML = html;
         return txt.value;
     }
+
+    useEffect(() => {
+        if (timerRef.current) {
+            timerRef.current.reset();
+            timerRef.current.start();
+        }
+    }, [currentQuestionIndex]);
 
     // Shuffle once when the question changes
     useEffect(() => {
@@ -43,16 +53,21 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: 
 
         setTimeout(() => {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
-        }, 3000);
+        }, 4000);
     }
 
     function handleAnswerIsWrong() {
-        wrongAnswer();
+        wrongAnswer('answered');
 
         setRevealedAnswer(questions[currentQuestionIndex].correct_answer);
     }
 
     async function checkAnswer(answer: string) {
+        //Stop the timer immediately when an answer is selected
+        if (timerRef.current) {
+            timerRef.current.pause();
+        }
+
         setSelectedAnswer(answer);
         setColorState('bg-amber-500');
 
@@ -73,6 +88,15 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: 
     function questionsTracker() {
         return Array.from({ length: quantity }, (_, i) => quantity - i);
     }
+
+    const timerRanOut = useCallback(() => {
+        setTimeout(() => {
+            setSelectedAnswer(questions[currentQuestionIndex].correct_answer);
+            setColorState('bg-red-600');
+            wrongAnswer('timer');
+            setRevealedAnswer(questions[currentQuestionIndex].correct_answer);
+        }, 0);
+    }, [currentQuestionIndex, questions, wrongAnswer]);
 
     return (
         <div className="relative w-full h-full">
@@ -105,8 +129,13 @@ export default function Game({ questions, quantity, rightAnswer, wrongAnswer }: 
                         </div>
                     )) }
                 </aside>
-                <div className="col-span-3 flex flex-col justify-center text-center gap-8">
-                    <div className="flex justify-center items-center max-w-4xl w-full mx-auto px-4 rounded-xl h-24 bg-black text-white border-2 border-blue-500">
+                <div className="col-span-3 flex flex-col justify-start text-center gap-8">
+
+                    <div className="flex my-12"></div>
+
+                    <CountdownTimer ref={timerRef} duration={30} onComplete={() => { timerRanOut(); }} />
+
+                    <div className="flex justify-center items-center max-w-4xl w-full mt-24 mx-auto px-4 rounded-xl h-24 bg-black text-white border-2 border-blue-500">
                         <h2 className="text-lg font-bold text-white">{decodeHtml(questions[currentQuestionIndex].question)}</h2>
                     </div>
                     <div className="grid grid-cols-2 gap-4 max-w-4xl w-full mx-auto">

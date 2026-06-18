@@ -6,7 +6,7 @@ import Game from '@/components/Game';
 
 import { RiVolumeUpFill, RiVolumeMuteFill } from '@remixicon/react';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, use } from 'react';
 
 type Categories = {
   trivia_categories: { id: number; name: string }[];
@@ -24,10 +24,17 @@ type Questions = {
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const wrongAnswer = useRef<HTMLAudioElement>(null);
+  const timerDone = useRef<HTMLAudioElement>(null);
   const rightAnswer = useRef<HTMLAudioElement>(null);
+  const audienceClap1 = useRef<HTMLAudioElement>(null);
+  const audienceClap2 = useRef<HTMLAudioElement>(null);
+  const audienceClap3 = useRef<HTMLAudioElement>(null);
+  const audienceClap4 = useRef<HTMLAudioElement>(null);
+  const audienceWin = useRef<HTMLAudioElement>(null);
+  const audienceDisappointment = useRef<HTMLAudioElement>(null);
 
   const pendingAutoPlay = useRef(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioEnabled, setaudioEnabled] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
 
   const [category, setCategory] = useState("General Knowledge");
@@ -44,6 +51,10 @@ export default function Home() {
   const [startVisible, setStartVisible] = useState(true);
   const [gameVisible, setGameVisible] = useState(false);
 
+  const audio = audioRef.current;
+  const numberOfQuestions = parseInt(numQuestions);
+  const FADE_DURATION = 400; // ms
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -56,7 +67,7 @@ export default function Home() {
         pendingAutoPlay.current = false;
         try {
           await audio.play();
-          setIsPlaying(true);
+          setaudioEnabled(true);
         } catch (err) {
           console.error("Auto-play after song switch failed:", err);
         }
@@ -82,13 +93,13 @@ export default function Home() {
   const toggleMusic = async () => {
     const audio = audioRef.current;
     if (!audio || !isAudioReady) return;
-    if (isPlaying) {
+    if (audioEnabled) {
       audio.pause();
-      setIsPlaying(false);
+      setaudioEnabled(false);
     } else {
       try {
         await audio.play();
-        setIsPlaying(true);
+        setaudioEnabled(true);
       } catch (error) {
         console.error("Playback failed:", error);
       }
@@ -100,10 +111,6 @@ export default function Home() {
     return cat ? cat.id : null;
   };
 
-  const numberOfQuestions = parseInt(numQuestions);
-
-  const FADE_DURATION = 400; // ms
-
   const handleStartGame = async () => {
     const categoryId = getCategoryId(category);
     const amount = parseInt(numQuestions);
@@ -111,7 +118,7 @@ export default function Home() {
 
     const url = new URL("https://opentdb.com/api.php");
 
-    if (isPlaying) {
+    if (audioEnabled) {
       const audio = audioRef.current;
       audio?.pause();
       pendingAutoPlay.current = true;
@@ -154,38 +161,42 @@ export default function Home() {
   };
 
   const handleRightAnswer = () => {
-    // pause audio and play wrong answer sound
-    const audio = audioRef.current;
+    const clapAudios = [audienceClap1.current, audienceClap2.current, audienceClap3.current, audienceClap4.current];
+    const randomClap = clapAudios[Math.floor(Math.random() * clapAudios.length)];
     const rightAudio = rightAnswer.current;
-    if (audio && rightAudio && isPlaying) {
+
+    if (audio && rightAudio && audioEnabled) {
+
       audio.pause();
       rightAudio.currentTime = 0;
+
       setTimeout(() => {
         rightAudio.play();
+        randomClap?.play();
       }, 300);
 
       setTimeout(() => {
-          audio.play();
-        }, 4000);
+        audio.play();
+      }, 4000);
     }
   }
 
-  const handleWrongAnswer = () => {
-    // pause audio and play wrong answer sound
-    const audio = audioRef.current;
-    const wrongAudio = wrongAnswer.current;
-    if (audio && wrongAudio && isPlaying) {
+  const handleWrongAnswer = (type: 'timer' | 'answered') => {
+    const audienceDisappointmentAudio = audienceDisappointment.current;
+    const gameOverAudio = type === 'timer' ? timerDone.current : wrongAnswer.current;
+    if (audio && gameOverAudio && audioEnabled) {
       audio.pause();
-      wrongAudio.currentTime = 0;
+      gameOverAudio.currentTime = 0;
       setTimeout(() => {
-        wrongAudio.play();
+        gameOverAudio.play();
+        audienceDisappointmentAudio?.play();
       }, 300);
     }
 
     setTimeout(() => {
-      wrongAudio?.pause();
-      wrongAudio!.currentTime = 0;
-    
+      gameOverAudio?.pause();
+      gameOverAudio!.currentTime = 0;
+
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setGameVisible(false));
       });
@@ -193,27 +204,36 @@ export default function Home() {
       setTimeout(() => {
         setVisibleScreen('start');
         setStartVisible(true);
+
+        if (audioEnabled) {
+          pendingAutoPlay.current = true;
+        }
+
+        setCurrentSong(`/audio/fastest-answer.mp3`);
+
       }, FADE_DURATION);
-    }, 4000);
-
-    setCurrentSong(`/audio/fastest-answer.mp3`);
-
-    audio?.play();
-
+    }, 10000);
   }
 
   return (
     <main className="relative flex flex-col items-center justify-center h-full bg-black">
       <audio ref={audioRef} preload="auto" loop />
       <audio ref={wrongAnswer} preload="auto" src="/audio/wrong-answer.mp3" />
+      <audio ref={timerDone} preload="auto" src="/audio/timer-done.mp3" />
       <audio ref={rightAnswer} preload="auto" src="/audio/correct-answer.mp3" />
+      <audio ref={audienceClap1} preload="auto" src="/audio/audience-clap-1.mp3" />
+      <audio ref={audienceClap2} preload="auto" src="/audio/audience-clap-2.mp3" />
+      <audio ref={audienceClap3} preload="auto" src="/audio/audience-clap-3.mp3" />
+      <audio ref={audienceClap4} preload="auto" src="/audio/audience-clap-4.mp3" />
+      <audio ref={audienceWin} preload="auto" src="/audio/audience-win.mp3" />
+      <audio ref={audienceDisappointment} preload="auto" src="/audio/audience-disappointment.mp3" />
 
       <div className="absolute z-10 top-0 right-0 w-full flex justify-end p-4">
         <ButtonGlass size="small" onClick={toggleMusic} disabled={!isAudioReady}>
           <div className="flex items-center gap-2">
-            {isPlaying ?
-              <><RiVolumeMuteFill size={20} /> Disable Music</> :
-              <><RiVolumeUpFill size={20} /> Enable Music</>}
+            {audioEnabled ?
+              <><RiVolumeUpFill size={20} /> Music</> :
+              <><RiVolumeMuteFill size={20} /> Music</>}
           </div>
         </ButtonGlass>
       </div>
